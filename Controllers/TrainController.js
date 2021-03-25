@@ -1,13 +1,22 @@
 const express = require('express');
 const {Train} = require('../Models/Train');
-
+const {getDayOfWeek} = require('../Utils/DateUtilities');
 const router = express.Router();
 
 //GET Method
 router.get('/',async (req,res) => {
     try {
-        const trains = await Train.find();
+        const weekday = getDayOfWeek(req.query.date);
+        let trains;
         
+        if(weekday)
+            trains = await Train.find({
+                TrainWeekDaySchedule : weekday
+            });
+        
+        if(!weekday)
+            trains = await Train.find();
+
         res.send(trains);
     } catch (error) {
         console.log(error);
