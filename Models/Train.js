@@ -26,10 +26,6 @@ const TrainStationsSchema = new mongoose.Schema(
         HaltTime: {
             type: Date,
             required: true
-        },
-        IsReturning: {
-            type: Boolean,
-            required: true
         }
     }
 );
@@ -48,18 +44,10 @@ const SeatsSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    SeatBookingDetails: [{
-        BookingDate: {
-            type: Date
-        },
-        IsBooked: {
-            type: Boolean,
-            required: true
-        },
-        UserId: {
-            type: mongoose.Schema.Types.ObjectId
-        }
-    }]
+    IsBooked: {
+        type: Boolean,
+        required: true
+    }
 });
 
 // Defining Schema for Train Model (Parent Schema)

@@ -1,20 +1,40 @@
 const express = require('express');
 const {Train} = require('../Models/Train');
+const {SeatBookingDetail} = require('../Models/SeatBookingDetail');
 const {getDayOfWeek} = require('../Utils/DateUtilities');
 const router = express.Router();
 
 //GET Method
-router.get('/',async (req,res) => {
+router.get('/:from-:to-:date',async (req,res) => {
     try {
-        const weekday = getDayOfWeek(req.query.date);
-        let trains;
+        const weekday = getDayOfWeek(req.params.date);
+        const fromStation = req.params.from;
+        const toStation = req.params.to;
         
-        if(weekday)
-            trains = await Train.find({
-                TrainWeekDaySchedule : weekday
-            });
-        
-        if(!weekday)
+        if((fromStation && toStation) && (fromStation === toStation))
+            return res.status(400).send("From and To station cannot be same");
+
+        let trains=[];
+
+        if(weekday && fromStation && toStation){
+            let output = [];
+            trains = await Train.find({$and:([
+                {'TrainStations.StationCode' : fromStation}
+            ]
+            )});
+            trains.forEach(
+                (train)=>{
+                    if(train.TrainStations[0].StationCode === fromStation 
+                        && train.TrainStations[trains.length-1].StationCode === toStation){
+                        output.push(train);
+                    }
+                }
+            );
+
+            trains = output;
+        }
+            
+        if(!weekday || !fromStation || !toStation)
             trains = await Train.find();
 
         res.send(trains);
@@ -35,7 +55,52 @@ router.get('/:id',async (req,res)=>{
     }
 })
 
+router.get('/getseatbooking/:userid-:trainid-:seatid',async (req,res)=>{
+    const userId = req.params.userid;
+    const seatId = req.params.seatid;
+    const trainId = req.params.trainid;
+
+    const bookingDetail = await SeatBookingDetail.find(
+        {
+            UserId : userId,
+            TrainId : trainId,
+            SeatId : seatId
+        }
+    )
+
+    res.send(bookingDetail);
+});
+
 //POST Method
+router.post('/bookseat',async (req, res)=>{
+    try {
+        const bookedSeatIds = req.body.BookedSeatIds;
+        let output;
+
+        bookedSeatIds.forEach(
+            async (bookedSeatId) => {
+               let train =  await Train.findById(req.body.TrainId);
+               let seat = train.Seats.id(bookedSeatId);
+               seat.IsBooked = true;
+               output = await train.save();
+
+               const seatbookingdetail = new SeatBookingDetail({
+                BookingDate: req.body.BookingDate,
+                UserId: req.body.UserId,
+                TrainId: req.body.TrainId,
+                SeatId: req.body.bookedSeatId
+                });
+    
+                await seatbookingdetail.save();
+            }
+        );
+
+        res.send(output);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 router.post('/',async (req,res)=>{
     try {
         const train = new Train({

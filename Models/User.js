@@ -1,14 +1,5 @@
 const mongoose = require('mongoose');
 
-const BookingHistoriesSchema = new mongoose.Schema({
-    TrainId : {
-        type: mongoose.Schema.Types.ObjectId
-    },
-    SeatId : {
-        type: mongoose.Schema.Types.ObjectId
-    }
-}); 
-
 const UserSchema = new mongoose.Schema({
     Username: {
         type: String,
@@ -21,9 +12,9 @@ const UserSchema = new mongoose.Schema({
     Password: {
         type: String,
         required: true
-    },
-    BookingHistories: [BookingHistoriesSchema]
-});
+    }
+},
+{ timestamps: true});
 
 const User = mongoose.model("Users",UserSchema);
 

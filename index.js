@@ -3,6 +3,7 @@ const cors = require("cors");
 const DBInitializer = require('./Initializers/DBInitializers');
 const TrainController = require('./Controllers/TrainController');
 const UserController = require('./Controllers/UserController');
+const TrainRouteController = require('./Controllers/TrainRouteController');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 //Importing Controllers
 app.use('/api/trains',TrainController);
 app.use('/api/users',UserController);
+app.use('/api/trainroutes',TrainRouteController);
 
 //Starting the Server
 const port = process.env.PORT || 5000;

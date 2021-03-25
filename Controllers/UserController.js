@@ -19,7 +19,7 @@ router.get('/:id',async (req,res)=>{
     try {
         const user = await User.findById(req.params.id);
 
-        if(!user) return res.status(400).send("No Train were found with the given Id");
+        if(!user) return res.status(400).send("No User were found with the given Id");
 
         res.send(user);
     } catch (error) {
@@ -58,7 +58,7 @@ router.put('/:id',async (req,res) => {
             { new:true}
             );
 
-        if(!user) return res.status(400).send("No Train were found with the given Id");
+        if(!user) return res.status(400).send("No User were found with the given Id");
 
         res.send(user);
     } catch (error) {
