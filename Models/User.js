@@ -2,12 +2,10 @@ const mongoose = require('mongoose');
 
 const BookingHistoriesSchema = new mongoose.Schema({
     TrainId : {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
+        type: mongoose.Schema.Types.ObjectId
     },
     SeatId : {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
+        type: mongoose.Schema.Types.ObjectId
     }
 }); 
 
@@ -24,7 +22,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    BookingHistories: []
+    BookingHistories: [BookingHistoriesSchema]
 });
 
 const User = mongoose.model("Users",UserSchema);
