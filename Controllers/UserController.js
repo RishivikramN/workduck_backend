@@ -73,7 +73,7 @@ router.post('/signinuser',async (req,res)=>{
 
         if (!validPassword) return res.status(400).send("Invalid Email or Password");
         
-        res.send({token : user.generateAuthToken(), username: user.UserName});
+        res.send({token : user.generateAuthToken(), username: user.Username});
 
     } catch (ex) {
         console.log(ex);
