@@ -5,6 +5,17 @@ const {getDayOfWeek} = require('../Utils/DateUtilities');
 const router = express.Router();
 
 //GET Method
+router.get('/getbookinghistory/:id',async (req,res)=>{
+    try {
+        const userId = req.params.id;
+        const seatbookingdetail = await SeatBookingDetail.find({
+            UserId: userId
+        });
+        res.send(seatbookingdetail);
+    } catch (error) {
+        console.log(error);
+    }
+});
 router.get('/:from-:to-:date',async (req,res) => {
     try {
         const weekday = getDayOfWeek(req.params.date);

@@ -48,7 +48,8 @@ router.post("/registeruser",async (req,res)=>{
 
         const response = {
             userName: result.Username,
-            emailId: result.EmailId
+            emailId: result.EmailId,
+            userId: result._id
         }
 
         res.send(response);
@@ -73,7 +74,7 @@ router.post('/signinuser',async (req,res)=>{
 
         if (!validPassword) return res.status(400).send("Invalid Email or Password");
         
-        res.send({token : user.generateAuthToken(), username: user.Username});
+        res.send({token : user.generateAuthToken(), username: user.Username, userId: user._id});
 
     } catch (ex) {
         console.log(ex);
