@@ -8,27 +8,30 @@ const router = express.Router();
 router.get('/getbookinghistory/:id',async (req,res)=>{
     try {
         let bookedSeats=[];
+        let output = [];
         const userId = req.params.id;
-        const seatbookingdetail = await SeatBookingDetail.find({
+        const seatbookingdetails = await SeatBookingDetail.find({
             UserId: userId
         });
-        const train = await Train.findById(seatbookingdetail[0].TrainId);
-        seatbookingdetail[0].SeatId.forEach(
-            (bookedseatid)=>{
-                train.Seats.forEach(
-                    (trainseat)=>{
-                        if(bookedseatid.equals(trainseat._id)){
-                            bookedSeats.push(trainseat);
-                        }
-                    }
-                )
+        
+        for (const seatbookingdetail of seatbookingdetails) {
+            bookedSeats=[];
+            let train = await Train.findById(seatbookingdetail.TrainId);
+            for (const seatid of seatbookingdetail.SeatId) {
+                for (const trainseat of train.Seats) {
+                    if(seatid.equals(trainseat._id))
+                        bookedSeats.push(trainseat);
+                }
             }
-        );
-        res.send({
-            TrainName: train.TrainName,
-            TrainCode: train.TrainCode,
-            Seats: bookedSeats
-        });
+            output.push({
+                TrainName: train.TrainName,
+                TrainCode: train.TrainCode,
+                Seats: bookedSeats,
+                BookingDate: seatbookingdetail.BookingDate
+            });
+        }
+        
+        res.send(output);
     } catch (error) {
         console.log(error);
     }
