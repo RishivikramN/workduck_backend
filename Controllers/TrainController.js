@@ -7,11 +7,28 @@ const router = express.Router();
 //GET Method
 router.get('/getbookinghistory/:id',async (req,res)=>{
     try {
+        let bookedSeats=[];
         const userId = req.params.id;
         const seatbookingdetail = await SeatBookingDetail.find({
             UserId: userId
         });
-        res.send(seatbookingdetail);
+        const train = await Train.findById(seatbookingdetail[0].TrainId);
+        seatbookingdetail[0].SeatId.forEach(
+            (bookedseatid)=>{
+                train.Seats.forEach(
+                    (trainseat)=>{
+                        if(bookedseatid.equals(trainseat._id)){
+                            bookedSeats.push(trainseat);
+                        }
+                    }
+                )
+            }
+        );
+        res.send({
+            TrainName: train.TrainName,
+            TrainCode: train.TrainCode,
+            Seats: bookedSeats
+        });
     } catch (error) {
         console.log(error);
     }
@@ -95,17 +112,17 @@ router.post('/bookseat',async (req, res)=>{
                let seat = train.Seats.id(bookedSeatId);
                seat.IsBooked = true;
                output = await train.save();
-
-               const seatbookingdetail = new SeatBookingDetail({
-                BookingDate: req.body.BookingDate,
-                UserId: req.body.UserId,
-                TrainId: req.body.TrainId,
-                SeatId: req.body.bookedSeatId
-                });
-    
-                await seatbookingdetail.save();
             }
         );
+
+        const seatbookingdetail = new SeatBookingDetail({
+            BookingDate: req.body.BookingDate,
+            UserId: req.body.UserId,
+            TrainId: req.body.TrainId,
+            SeatId: bookedSeatIds
+            });
+
+        await seatbookingdetail.save();
 
         res.send(output);
     } catch (error) {

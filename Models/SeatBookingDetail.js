@@ -12,7 +12,7 @@ const SeatBookingDetailSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId
     },
     SeatId: {
-        type: mongoose.Schema.Types.ObjectId
+        type: [mongoose.Schema.Types.ObjectId]
     }
 });
 
