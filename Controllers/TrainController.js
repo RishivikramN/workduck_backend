@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/livestatus/:id',async(req,res)=>{
     try {
         const trainId = req.params.id;
-        const currentSystemDate = new Date();
+        const currentSystemDate = new Date("Wed Apr 28 2021 12:20:00 GMT+0530 (India Standard Time)");
         const currentWeekDay = getDayOfWeek(currentSystemDate);
         const currentTime = currentSystemDate.toTimeString();
         let output = {
@@ -34,7 +34,8 @@ router.get('/livestatus/:id',async(req,res)=>{
             output={
                 from: "",
                 to: "",
-                standby: train.TrainStations[train.TrainStations.length - 1].StationCode
+                standby: train.TrainStations[train.TrainStations.length - 1].StationCode,
+                Message:""
             }   
             res.send(output);
             return;
@@ -44,12 +45,13 @@ router.get('/livestatus/:id',async(req,res)=>{
             const stationArrivalTime = new Date(trainstation.ArrivalTime).toTimeString();
             const stationDepartureTime = new Date(trainstation.DepartureTime).toTimeString();
 
-            if(stationArrivalTime < currentTime && stationDepartureTime > currentTime)
+            if(stationArrivalTime <= currentTime && stationDepartureTime >= currentTime)
             {
                 output = {
                     from: "",
                     to: "",
-                    standby: trainstation.StationCode
+                    standby: trainstation.StationCode,
+                    Message: ""
                 }
                 res.send(output);
                 return;
@@ -67,13 +69,15 @@ router.get('/livestatus/:id',async(req,res)=>{
                     output = {
                         from : prevTrainStation,
                         to : trainstation.StationCode,
-                        standby: ""
+                        standby: "",
+                        Message:""
                     }
                 else
                     output = {
                         from: "",
                         to: "",
-                        standby: trainstation.StationCode
+                        standby: trainstation.StationCode,
+                        Message:""
                     }
             }
             prevTrainStation = trainstation.StationCode;
