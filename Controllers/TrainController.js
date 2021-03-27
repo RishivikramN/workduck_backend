@@ -1,10 +1,87 @@
 const express = require('express');
 const {Train} = require('../Models/Train');
 const {SeatBookingDetail} = require('../Models/SeatBookingDetail');
-const {getDayOfWeek} = require('../Utils/DateUtilities');
+const {getDayOfWeek,getFullNameOfWeekDay} = require('../Utils/DateUtilities');
 const router = express.Router();
 
 //GET Method
+router.get('/livestatus/:id',async(req,res)=>{
+    try {
+        const trainId = req.params.id;
+        const currentSystemDate = new Date("Mon Apr 26 2021 15:37:00 GMT+0530 (India Standard Time)");
+        const currentWeekDay = getDayOfWeek(currentSystemDate);
+        const currentTime = currentSystemDate.toTimeString();
+
+        const train = await Train.findById(trainId);
+        
+        if(!train.TrainWeekDaySchedule.includes(currentWeekDay))
+            res.status(400).send(`${train.TrainCode}-${train.TrainName} will not run on ${getFullNameOfWeekDay(currentWeekDay)}'s`);
+        //Assigning possible minimum date
+        let prevTrainStationDepartureTime = new Date("01/01/1000");
+        let prevTrainStation = "";
+        let output = {
+            from: "",
+            to: "",
+            standby:""
+        };
+
+        if(currentTime >= new Date(train.TrainStations[train.TrainStations.length - 1].ArrivalTime).toTimeString())
+        {
+            output={
+                from: "",
+                to: "",
+                standby: train.TrainStations[train.TrainStations.length - 1].StationCode
+            }   
+            res.send(output);
+            return;
+        }
+
+        for (const trainstation of train.TrainStations) {
+            const stationArrivalTime = new Date(trainstation.ArrivalTime).toTimeString();
+            const stationDepartureTime = new Date(trainstation.DepartureTime).toTimeString();
+
+            if(stationArrivalTime < currentTime && stationDepartureTime > currentTime)
+            {
+                output = {
+                    from: "",
+                    to: "",
+                    standby: trainstation.StationCode
+                }
+                res.send(output);
+                return;
+            }
+        }
+
+        for (const trainstation of train.TrainStations) {
+
+            const stationArrivalTime = new Date(trainstation.ArrivalTime).toTimeString();
+            const prevStationTime = prevTrainStationDepartureTime.toTimeString();
+
+            if(stationArrivalTime > currentTime && prevStationTime <= currentTime)
+            {
+                if(prevTrainStation)
+                    output = {
+                        from : prevTrainStation,
+                        to : trainstation.StationCode,
+                        standby: ""
+                    }
+                else
+                    output = {
+                        from: "",
+                        to: "",
+                        standby: trainstation.StationCode
+                    }
+            }
+            prevTrainStation = trainstation.StationCode;
+            prevTrainStationDepartureTime = new Date(trainstation.DepartureTime);
+        }
+        
+        res.send(output);
+
+    } catch (error) {
+        console.log(error);
+    }
+});
 router.get('/getbookinghistory/:id',async (req,res)=>{
     try {
         let bookedSeats=[];

@@ -16,15 +16,11 @@ const TrainStationsSchema = new mongoose.Schema(
             required: true
         },
         ArrivalTime: {
-            type: Date,
+            type: String,
             required: true
         },
         DepartureTime: {
-            type: Date,
-            required: true
-        },
-        HaltTime: {
-            type: Date,
+            type: String,
             required: true
         }
     }
