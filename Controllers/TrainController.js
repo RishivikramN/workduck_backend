@@ -14,8 +14,11 @@ router.get('/livestatus/:id',async(req,res)=>{
 
         const train = await Train.findById(trainId);
         
-        if(!train.TrainWeekDaySchedule.includes(currentWeekDay))
-            res.status(400).send(`${train.TrainCode}-${train.TrainName} will not run on ${getFullNameOfWeekDay(currentWeekDay)}'s`);
+        if(!train.TrainWeekDaySchedule.includes(currentWeekDay)){
+            res.send(`${train.TrainCode}-${train.TrainName} will not run on ${getFullNameOfWeekDay(currentWeekDay)}'s`);
+            return;
+        }
+        
         //Assigning possible minimum date
         let prevTrainStationDepartureTime = new Date("01/01/1000");
         let prevTrainStation = "";
