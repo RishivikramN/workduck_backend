@@ -11,22 +11,23 @@ router.get('/livestatus/:id',async(req,res)=>{
         const currentSystemDate = new Date();
         const currentWeekDay = getDayOfWeek(currentSystemDate);
         const currentTime = currentSystemDate.toTimeString();
-
-        const train = await Train.findById(trainId);
-        
-        if(!train.TrainWeekDaySchedule.includes(currentWeekDay)){
-            res.send(`${train.TrainCode}-${train.TrainName} will not run on ${getFullNameOfWeekDay(currentWeekDay)}'s`);
-            return;
-        }
-        
-        //Assigning possible minimum date
-        let prevTrainStationDepartureTime = new Date("01/01/1000");
-        let prevTrainStation = "";
         let output = {
             from: "",
             to: "",
-            standby:""
+            standby:"",
+            Message:""
         };
+        const train = await Train.findById(trainId);
+        
+        if(!train.TrainWeekDaySchedule.includes(currentWeekDay)){
+            output.Message = `${train.TrainCode}-${train.TrainName} will not run on ${getFullNameOfWeekDay(currentWeekDay)}'s`;
+            res.send(output);
+            return;
+        }
+
+        //Assigning possible minimum date
+        let prevTrainStationDepartureTime = new Date("01/01/1000");
+        let prevTrainStation = "";
 
         if(currentTime >= new Date(train.TrainStations[train.TrainStations.length - 1].ArrivalTime).toTimeString())
         {
