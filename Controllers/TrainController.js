@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/livestatus/:id',async(req,res)=>{
     try {
         const trainId = req.params.id;
-        const currentSystemDate = new Date("Wed Apr 28 2021 12:20:00 GMT+0530 (India Standard Time)");
+        const currentSystemDate = new Date();
         const currentWeekDay = getDayOfWeek(currentSystemDate);
         const currentTime = currentSystemDate.toTimeString();
         let output = {
