@@ -2,12 +2,51 @@ const express = require('express');
 const {Train} = require('../Models/Train');
 const {SeatBookingDetail} = require('../Models/SeatBookingDetail');
 const {getDayOfWeek,getFullNameOfWeekDay} = require('../Utils/DateUtilities');
+const { TrainRoute } = require('../Models/TrainRoute');
 const router = express.Router();
 
 //GET Method
-router.get('/livestatus/:id',async(req,res)=>{
+router.get('/traintraffic/:stationid-:fromtime-:totime',async(req,res)=>{
     try {
-        const trainId = req.params.id;
+        const stationId = req.params.stationid;
+        const fromTime = new Date(req.params.fromTime).toTimeString();
+        const toTime = new Date(req.params.toTime).toTimeString();
+        let output = [];
+
+        //Retrieve the station requested by the user
+        const station = await TrainRoute.findById(stationId);
+
+        const trains = await Train.find(
+            {
+                'TrainStations.StationCode' : station.StationCode
+            }
+        );
+        
+        //Retrieve the trains based on the timeframes requested by the user
+        for (const train of trains) {
+            for (const trainstation of train.TrainStations) {
+                const stationArrivalTime = new Date(trainstation.ArrivalTime).toTimeString();
+                const stationDepartureTime = new Date(trainstation.DepartureTime).toTimeString();
+
+                if(trainstation.StationCode == station.StationCode){
+                    if(stationArrivalTime<=fromTime && stationDepartureTime<=toTime)
+                    {
+                        output.push(train);
+                    }    
+                }
+            }    
+        }
+
+        res.send(output);
+
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+router.get('/livestatus/:trainid',async(req,res)=>{
+    try {
+        const trainId = req.params.trainid;
         const currentSystemDate = new Date();
         const currentWeekDay = getDayOfWeek(currentSystemDate);
         const currentTime = currentSystemDate.toTimeString();
@@ -90,11 +129,11 @@ router.get('/livestatus/:id',async(req,res)=>{
         console.log(error);
     }
 });
-router.get('/getbookinghistory/:id',async (req,res)=>{
+router.get('/getbookinghistory/:userid',async (req,res)=>{
     try {
         let bookedSeats=[];
         let output = [];
-        const userId = req.params.id;
+        const userId = req.params.userid;
         const seatbookingdetails = await SeatBookingDetail.find({
             UserId: userId
         });
@@ -174,9 +213,9 @@ router.get('/:from-:to-:date',async (req,res) => {
     }   
 });
 
-router.get('/:id',async (req,res)=>{
+router.get('/:trainid',async (req,res)=>{
     try {
-        const train = await Train.findById(req.params.id);
+        const train = await Train.findById(req.params.trainid);
 
         if(!train) return res.status(400).send("No Train were found with the given Id");
 
