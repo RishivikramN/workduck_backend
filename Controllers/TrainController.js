@@ -50,18 +50,32 @@ router.get('/:from-:to-:date',async (req,res) => {
         if(weekday && fromStation && toStation){
             let output = [];
             trains = await Train.find(
-                {'TrainStations.StationCode' : fromStation}
-            );
-            trains.forEach(
-                (train)=>{
-                    if(train.TrainStations[0].StationCode === fromStation 
-                        && train.TrainStations[train.TrainStations.length-1].StationCode === toStation
-                        && train.TrainWeekDaySchedule.includes(weekday)){
-                            
-                        output.push(train);
-                    }
+                {
+                    $and:[
+                        {
+                            "TrainStations.StationCode" : fromStation
+                        },
+                        {
+                            "TrainStations.StationCode" : toStation
+                        }
+                    ]
                 }
             );
+            
+            for (const train of trains) {
+                let fromStationSeqNum = 0;
+                let toStationSeqNum = 0;
+
+                for (const trainstation of train.TrainStations) {
+                    if(trainstation.StationCode == fromStation)
+                        fromStationSeqNum = trainstation.SequenceNumber;
+                    if(trainstation.StationCode == toStation)
+                        toStationSeqNum = trainstation.SequenceNumber;
+                }
+
+                if((fromStationSeqNum < toStationSeqNum) && train.TrainWeekDaySchedule.includes(weekday))
+                    output.push(train);
+            }
 
             trains = output;
         }
