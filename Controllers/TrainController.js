@@ -11,6 +11,8 @@ router.get('/traintraffic/:stationid-:fromtime-:totime',async(req,res)=>{
         const stationId = req.params.stationid;
         const fromTime = new Date(req.params.fromTime).toTimeString();
         const toTime = new Date(req.params.toTime).toTimeString();
+        const currentSystemDate = new Date();
+        const currentWeekDay = getDayOfWeek(currentSystemDate);
         let output = [];
 
         //Retrieve the station requested by the user
@@ -24,6 +26,10 @@ router.get('/traintraffic/:stationid-:fromtime-:totime',async(req,res)=>{
         
         //Retrieve the trains based on the timeframes requested by the user
         for (const train of trains) {
+
+            if(!train.TrainWeekDaySchedule.includes(currentWeekDay))
+                continue;
+                
             for (const trainstation of train.TrainStations) {
                 const stationArrivalTime = new Date(trainstation.ArrivalTime).toTimeString();
                 const stationDepartureTime = new Date(trainstation.DepartureTime).toTimeString();
