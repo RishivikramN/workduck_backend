@@ -3,10 +3,12 @@ const {Train} = require('../Models/Train');
 const {SeatBookingDetail} = require('../Models/SeatBookingDetail');
 const {getDayOfWeek,getFullNameOfWeekDay} = require('../Utils/DateUtilities');
 const { TrainRoute } = require('../Models/TrainRoute');
+const auth = require("../Middlewares/AuthUser");
+const admin = require("../Middlewares/AuthAdmin");
 const router = express.Router();
 
 //GET Method
-router.get('/traintraffic/:stationid-:fromtime-:totime',async(req,res)=>{
+router.get('/traintraffic/:stationid-:fromtime-:totime',[auth,admin],async(req,res)=>{
     try {
         const stationId = req.params.stationid;
         const fromTime = new Date(req.params.fromTime).toTimeString();
@@ -29,7 +31,7 @@ router.get('/traintraffic/:stationid-:fromtime-:totime',async(req,res)=>{
 
             if(!train.TrainWeekDaySchedule.includes(currentWeekDay))
                 continue;
-                
+
             for (const trainstation of train.TrainStations) {
                 const stationArrivalTime = new Date(trainstation.ArrivalTime).toTimeString();
                 const stationDepartureTime = new Date(trainstation.DepartureTime).toTimeString();
@@ -50,7 +52,7 @@ router.get('/traintraffic/:stationid-:fromtime-:totime',async(req,res)=>{
     }
 });
 
-router.get('/livestatus/:trainid',async(req,res)=>{
+router.get('/livestatus/:trainid',[auth],async(req,res)=>{
     try {
         const trainId = req.params.trainid;
         const currentSystemDate = new Date();
@@ -135,7 +137,8 @@ router.get('/livestatus/:trainid',async(req,res)=>{
         console.log(error);
     }
 });
-router.get('/getbookinghistory/:userid',async (req,res)=>{
+
+router.get('/getbookinghistory/:userid',[auth],async (req,res)=>{
     try {
         let bookedSeats=[];
         let output = [];
@@ -166,7 +169,8 @@ router.get('/getbookinghistory/:userid',async (req,res)=>{
         console.log(error);
     }
 });
-router.get('/:from-:to-:date',async (req,res) => {
+
+router.get('/:from-:to-:date',[auth],async (req,res) => {
     try {
         const weekday = getDayOfWeek(req.params.date);
         const fromStation = req.params.from;
@@ -219,7 +223,7 @@ router.get('/:from-:to-:date',async (req,res) => {
     }   
 });
 
-router.get('/:trainid',async (req,res)=>{
+router.get('/:trainid',[auth],async (req,res)=>{
     try {
         const train = await Train.findById(req.params.trainid);
 
@@ -231,7 +235,7 @@ router.get('/:trainid',async (req,res)=>{
     }
 })
 
-router.get('/getseatbooking/:userid-:trainid-:seatid',async (req,res)=>{
+router.get('/getseatbooking/:userid-:trainid-:seatid',[auth],async (req,res)=>{
     const userId = req.params.userid;
     const seatId = req.params.seatid;
     const trainId = req.params.trainid;
@@ -248,7 +252,7 @@ router.get('/getseatbooking/:userid-:trainid-:seatid',async (req,res)=>{
 });
 
 //POST Method
-router.post('/bookseat',async (req, res)=>{
+router.post('/bookseat',[auth],async (req, res)=>{
     try {
         const bookedSeatIds = req.body.BookedSeatIds;
         let output;
@@ -290,28 +294,6 @@ router.post('/',async (req,res)=>{
         const output = await train.save();
 
         res.send(output);
-    } catch (error) {
-        console.log(error);
-    }
-});
-
-//PUT Method
-router.put('/:id',async (req,res) => {
-    try {
-        const train = await Train.findByIdAndUpdate(req.params.id,
-            {
-                TrainCode: req.body.TrainCode,
-                TrainName: req.body.TrainName,
-                TrainWeekDaySchedule: req.body.TrainWeekDaySchedule,
-                TrainStations: req.body.TrainStations,
-                Seats: req.body.Seats
-            },
-            { new:true}
-            );
-
-        if(!train) return res.status(400).send("No Train were found with the given Id");
-
-        res.send(train);
     } catch (error) {
         console.log(error);
     }

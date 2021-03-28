@@ -1,11 +1,13 @@
 const express = require('express');
 const bcrypt = require("bcrypt");
 const {User} = require('../Models/User');
+const auth = require("../Middlewares/AuthUser");
+const admin = require("../Middlewares/AuthAdmin");
 
 const router = express.Router();
 
 //GET Method
-router.get('/', async (req,res)=>{
+router.get('/',[auth,admin], async (req,res)=>{
     try {
         const users = await User.find();
         
@@ -16,7 +18,7 @@ router.get('/', async (req,res)=>{
 });
 
 
-router.get('/:id',async (req,res)=>{
+router.get('/:id',[auth,admin],async (req,res)=>{
     try {
         const user = await User.findById(req.params.id);
 
@@ -41,7 +43,8 @@ router.post("/registeruser",async (req,res)=>{
         const user = new User({
             Username: req.body.userName,
             EmailId: req.body.emailId,
-            Password: password
+            Password: password,
+            isAdmin: req.body.isAdmin
         });
 
         const result = await user.save();
@@ -49,7 +52,8 @@ router.post("/registeruser",async (req,res)=>{
         const response = {
             userName: result.Username,
             emailId: result.EmailId,
-            userId: result._id
+            userId: result._id,
+            isAdmin: result.isAdmin
         }
 
         res.send(response);
@@ -74,31 +78,10 @@ router.post('/signinuser',async (req,res)=>{
 
         if (!validPassword) return res.status(400).send("Invalid Email or Password");
         
-        res.send({token : user.generateAuthToken(), username: user.Username, userId: user._id});
+        res.send({token : user.generateAuthToken(), username: user.Username, userId: user._id, isAdmin: user.isAdmin});
 
     } catch (ex) {
         console.log(ex);
-    }
-});
-
-//PUT Method
-router.put('/:id',async (req,res) => {
-    try {
-        const user = await User.findByIdAndUpdate(req.params.id,
-            {
-                Username: req.body.Username,
-                EmailId: req.body.EmailId,
-                Password: req.body.Password,
-                BookingHistories: req.body.BookingHistories
-            },
-            { new:true}
-            );
-
-        if(!user) return res.status(400).send("No User were found with the given Id");
-
-        res.send(user);
-    } catch (error) {
-        console.log(error);
     }
 });
 
