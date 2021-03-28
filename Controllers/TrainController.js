@@ -63,7 +63,8 @@ router.get('/livestatus/:trainid',[auth],async(req,res)=>{
             from: "",
             to: "",
             standby:"",
-            Message:""
+            Message:"",
+            delay: false
         };
         const train = await Train.findById(trainId);
         
@@ -83,7 +84,8 @@ router.get('/livestatus/:trainid',[auth],async(req,res)=>{
                 from: "",
                 to: "",
                 standby: train.TrainStations[train.TrainStations.length - 1].StationCode,
-                Message:""
+                Message:"",
+                delay: train.isOnDelay
             }   
             res.send(output);
             return;
@@ -99,7 +101,8 @@ router.get('/livestatus/:trainid',[auth],async(req,res)=>{
                     from: "",
                     to: "",
                     standby: trainstation.StationCode,
-                    Message: ""
+                    Message: "",
+                    delay: train.isOnDelay
                 }
                 res.send(output);
                 return;
@@ -118,14 +121,16 @@ router.get('/livestatus/:trainid',[auth],async(req,res)=>{
                         from : prevTrainStation,
                         to : trainstation.StationCode,
                         standby: "",
-                        Message:""
+                        Message:"",
+                        delay: train.isOnDelay
                     }
                 else
                     output = {
                         from: "",
                         to: "",
                         standby: trainstation.StationCode,
-                        Message:""
+                        Message:"",
+                        delay: train.isOnDelay
                     }
             }
             prevTrainStation = trainstation.StationCode;
