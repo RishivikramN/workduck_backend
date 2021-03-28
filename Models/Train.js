@@ -63,6 +63,7 @@ const TrainSchema = new mongoose.Schema(
             enum: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
             required: true
         },
+        isOnDelay: Boolean,
         TrainStations : [TrainStationsSchema],
         Seats: [SeatsSchema]
     },
