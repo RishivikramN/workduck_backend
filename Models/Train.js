@@ -1,3 +1,4 @@
+const Joi = require('@hapi/joi');
 const mongoose = require('mongoose');
 
 //Defining Schema for Schedule Model
@@ -70,4 +71,53 @@ const TrainSchema = new mongoose.Schema(
 
 const Train = mongoose.model("Trains",TrainSchema);
 
+function validateTrain(train){
+
+    // crafting input payload
+    let trainsInput = {
+        TrainCode : train.TrainCode,
+        TrainName : train.TrainName
+    };
+
+    const trainSchema = Joi.object(
+        {
+            TrainCode: Joi.string().trim().required(),
+            TrainName: Joi.string().trim().required()
+        }
+    );
+
+    const trainStationSchema = Joi.object().keys({
+        SequenceNumber: Joi.string().trim().required(),
+        StationCode: Joi.string().trim().required(),
+        StationName: Joi.string().trim().required(),
+        ArrivalTime: Joi.string().trim().required(),
+        DepartureTime: Joi.string().trim().required()
+    });
+
+    const seatSchema = Joi.object().keys({
+        SeatType: Joi.string().trim().required(),
+        SeatNumber: Joi.string().trim().required(),
+        Price: Joi.number().required(),
+        IsBooked: Joi.bool().required()
+    });
+
+    let trainStations = Joi.array().items(trainStationSchema);
+    let seats = Joi.array().items(seatSchema);
+
+    //checking results
+    let isTrainsPassed = trainSchema.validate(trainsInput);
+    let isTrainStationsPassed = trainStations.validate(train.TrainStations);
+    let isSeatsPassed = seats.validate(train.Seats);
+
+    if(isTrainsPassed.error)
+        return isTrainsPassed;
+
+    if(isTrainStationsPassed)
+        return isTrainStationsPassed;
+
+    if(isSeatsPassed)
+        return isSeatsPassed;
+}
+
 module.exports.Train = Train;
+module.exports.validate = validateTrain;

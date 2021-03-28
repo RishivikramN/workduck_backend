@@ -1,10 +1,11 @@
 const express = require('express');
-const {Train} = require('../Models/Train');
+const {Train, validate } = require('../Models/Train');
 const {SeatBookingDetail} = require('../Models/SeatBookingDetail');
 const {getDayOfWeek,getFullNameOfWeekDay} = require('../Utils/DateUtilities');
 const { TrainRoute } = require('../Models/TrainRoute');
 const auth = require("../Middlewares/AuthUser");
 const admin = require("../Middlewares/AuthAdmin");
+const mongoose = require("mongoose");
 const router = express.Router();
 
 //GET Method
@@ -259,6 +260,12 @@ router.post('/bookseat',[auth],async (req, res)=>{
 
         bookedSeatIds.forEach(
             async (bookedSeatId) => {
+               if (!mongoose.Types.ObjectId.isValid(bookedSeatId))
+                    return res.status(400).send("Invalid Seat Id");
+                    
+               if (!mongoose.Types.ObjectId.isValid(req.body.TrainId))
+                    return res.status(400).send("Invalid Train Id");
+
                let train =  await Train.findById(req.body.TrainId);
                let seat = train.Seats.id(bookedSeatId);
                seat.IsBooked = true;
@@ -283,6 +290,10 @@ router.post('/bookseat',[auth],async (req, res)=>{
 
 router.post('/',async (req,res)=>{
     try {
+        const {error} = validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+        
         const train = new Train({
             TrainCode: req.body.TrainCode,
             TrainName: req.body.TrainName,

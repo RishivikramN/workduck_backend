@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require("bcrypt");
-const {User} = require('../Models/User');
+const {User,validate} = require('../Models/User');
 const auth = require("../Middlewares/AuthUser");
 const admin = require("../Middlewares/AuthAdmin");
 
@@ -33,6 +33,10 @@ router.get('/:id',[auth,admin],async (req,res)=>{
 //POST Method
 router.post("/registeruser",async (req,res)=>{
     try{
+        const { error } = validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
+
         const isUserAlreadyExists = await User.findOne({ EmailId: req.body.emailId });
 
         if(isUserAlreadyExists) return res.send({error:"Email already exists"});
@@ -67,6 +71,13 @@ router.post("/registeruser",async (req,res)=>{
 
 router.post('/signinuser',async (req,res)=>{
     try {
+
+        //Assigning dummy username for passing validation
+        req.body.userName = "Dummy";
+
+        const { error } = validate(req.body);
+
+        if (error) return res.status(400).send(error.details[0].message);
 
         const user = await User.findOne({ EmailId: req.body.emailId });
         if (!user) return res.status(400).send("Invalid Email Id or Password");
