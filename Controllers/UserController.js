@@ -7,6 +7,8 @@ const admin = require("../Middlewares/AuthAdmin");
 const router = express.Router();
 
 //GET Method
+// Returns all the users from the database
+// Note: Accessible only by Admins
 router.get('/',[auth,admin], async (req,res)=>{
     try {
         const users = await User.find();
@@ -17,7 +19,8 @@ router.get('/',[auth,admin], async (req,res)=>{
     }   
 });
 
-
+// Return a specific user based on the user's query
+// Note: Accessible only by Admins
 router.get('/:id',[auth,admin],async (req,res)=>{
     try {
         const user = await User.findById(req.params.id);
@@ -31,6 +34,9 @@ router.get('/:id',[auth,admin],async (req,res)=>{
 })
 
 //POST Method
+// Register User route creates a new user document
+// in the database.
+// Note: Both the ordinary and Admin user.
 router.post("/registeruser",async (req,res)=>{
     try{
         const { error } = validate(req.body);
@@ -69,6 +75,8 @@ router.post("/registeruser",async (req,res)=>{
     
 });
 
+// SignIn route returns a token for accessing the 
+// protected routes.
 router.post('/signinuser',async (req,res)=>{
     try {
 

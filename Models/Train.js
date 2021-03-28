@@ -72,6 +72,7 @@ const TrainSchema = new mongoose.Schema(
 
 const Train = mongoose.model("Trains",TrainSchema);
 
+//Validation for train model
 function validateTrain(train){
 
     // crafting input payload

@@ -4,6 +4,7 @@ const {TrainRoute} = require('../Models/TrainRoute');
 const router = express.Router();
 
 //GET method
+//Returns all the train routes from the database
 router.get('/',async (req,res)=>{
     try {
         const trainroutes = await TrainRoute.find();
@@ -15,6 +16,7 @@ router.get('/',async (req,res)=>{
 });
 
 //POST Method
+// Creates new routes in the database
 router.post('/',async (req,res)=>{
     try {
         const trainroute = new TrainRoute({

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+//Connection to MongoDB
 module.exports = function(){
     mongoose.set('useCreateIndex', true);
     mongoose.set('useNewUrlParser', true);

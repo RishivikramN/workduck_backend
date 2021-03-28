@@ -9,6 +9,9 @@ const mongoose = require("mongoose");
 const router = express.Router();
 
 //GET Method
+// TrainTraffic route fetches all the trains stationed at the given station at
+// given time.
+//Note : Accessible Only by Admin
 router.get('/traintraffic/:stationid-:fromtime-:totime',[auth,admin],async(req,res)=>{
     try {
         const stationId = req.params.stationid;
@@ -53,6 +56,10 @@ router.get('/traintraffic/:stationid-:fromtime-:totime',[auth,admin],async(req,r
     }
 });
 
+// LiveStatus route fetches the selected train's
+// location based on the current server time
+// Note: This route is not actual GPS based data
+// It is mocked.
 router.get('/livestatus/:trainid',[auth],async(req,res)=>{
     try {
         const trainId = req.params.trainid;
@@ -144,6 +151,8 @@ router.get('/livestatus/:trainid',[auth],async(req,res)=>{
     }
 });
 
+// GetBookingHistory route gets the all the seat bookings 
+// done by the user.
 router.get('/getbookinghistory/:userid',[auth],async (req,res)=>{
     try {
         let bookedSeats=[];
@@ -176,6 +185,8 @@ router.get('/getbookinghistory/:userid',[auth],async (req,res)=>{
     }
 });
 
+// Train Search route returns all the trains that runs between 
+// the stations on the given date
 router.get('/:from-:to-:date',[auth],async (req,res) => {
     try {
         const weekday = getDayOfWeek(req.params.date);
@@ -229,6 +240,8 @@ router.get('/:from-:to-:date',[auth],async (req,res) => {
     }   
 });
 
+//Get Train route returns the requested train 
+// based on the given train id
 router.get('/:trainid',[auth],async (req,res)=>{
     try {
         const train = await Train.findById(req.params.trainid);
@@ -241,6 +254,7 @@ router.get('/:trainid',[auth],async (req,res)=>{
     }
 })
 
+// GetSeatBooking route returns the seatbookingdetail data
 router.get('/getseatbooking/:userid-:trainid-:seatid',[auth],async (req,res)=>{
     const userId = req.params.userid;
     const seatId = req.params.seatid;
@@ -258,6 +272,8 @@ router.get('/getseatbooking/:userid-:trainid-:seatid',[auth],async (req,res)=>{
 });
 
 //POST Method
+// BookSeat route books the seat that has been 
+// chosen by the user.
 router.post('/bookseat',[auth],async (req, res)=>{
     try {
         const bookedSeatIds = req.body.BookedSeatIds;
@@ -293,6 +309,8 @@ router.post('/bookseat',[auth],async (req, res)=>{
     }
 });
 
+// Post Train route creates a new Train 
+// document in the database.
 router.post('/',async (req,res)=>{
     try {
         const {error} = validate(req.body);

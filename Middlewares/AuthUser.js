@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const config = require('../Config/config.json');
 
+// Authenticates the user for accessing 
+// the endpoint routes.
 async function AuthUser(req,res,next){
     const token = req.header("x-auth-token");
 
