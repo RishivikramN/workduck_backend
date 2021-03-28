@@ -299,7 +299,8 @@ router.post('/',async (req,res)=>{
             TrainName: req.body.TrainName,
             TrainWeekDaySchedule: req.body.TrainWeekDaySchedule,
             TrainStations: req.body.TrainStations,
-            Seats: req.body.Seats
+            Seats: req.body.Seats,
+            isOnDelay: req.body.isOnDelay
         });
 
         const output = await train.save();
